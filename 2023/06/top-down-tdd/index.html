@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>
+  Top Down TDD · Recurse.se
+</title>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Martin Hellspong">
+<meta name="description" content="Considerations of Top down vs bottom up design">
+<meta name="keywords" content="blog,developer,personal,software,programming">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Top Down TDD"/>
+<meta name="twitter:description" content="Considerations of Top down vs bottom up design"/>
+
+<meta property="og:title" content="Top Down TDD" />
+<meta property="og:description" content="Considerations of Top down vs bottom up design" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://recurse.se/2023/06/top-down-tdd/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-06-23T18:13:42+02:00" />
+<meta property="article:modified_time" content="2023-06-23T18:13:42+02:00" />
+
+
+
+
+<link rel="canonical" href="https://recurse.se/2023/06/top-down-tdd/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.36f76aaf39a14ecf5c3a3c6250dcaf06c238b3d8365d17d646f95cb1874e852b.css" integrity="sha256-NvdqrzmhTs9cOjxiUNyvBsI4s9g2XRfWRvlcsYdOhSs=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+<meta name="generator" content="Hugo 0.114.1">
+
+
+
+
+
+  </head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Recurse.se
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/tags/">Tags</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://github.com/marhel"></a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://recurse.se/2023/06/top-down-tdd/">
+              Top Down TDD
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2023-06-23T18:13:42&#43;02:00">
+                June 23, 2023
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              20-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/tdd/">TDD</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/testing/">Testing</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/design/">Design</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/csharp/">C#</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/asp.net/">ASP.NET</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+          <img src="https://live.staticflickr.com/4736/24374579457_0cc95f1e65_b.jpg" alt="Featured image"/>
+        
+        <p>The software culture I operate in is strongly influenced by Extreme Programming (XP) and a big part of this is the importance of test driven development (TDD). We typically don&rsquo;t approve PRs without unit tests, as a concrete example. This post will discuss using TDD to design and implement a feature in a top-down fashion. The examples are in C# and ASP.NET, but I expect them to be understandable for people using different languages and frameworks.</p>
+<h2 id="bottom-up-design">
+  Bottom up design
+  <a class="heading-link" href="#bottom-up-design">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I am usually inclined to do bottom-up design, wherein I think about the problem at hand - typically a particular feature to implement - and break it down into parts which are the components I am confident I will need. In the case of C#, the components are often new interfaces and classes, and occasionally assemblies, or modifications of existing ones.</p>
+<p>I then start writing tests for one of those components, implement the behavior, and then continue with the next component. Then I write a few tests that verifies the behavior of the entire feature, where I use the components to compose the solution.</p>
+<p>This works well for small to medium issues where I can envision the entire solution, and the components needed in construction. In general, I think bottom-up works well for people, who, like me, have a lot of software design experience and thus a good feel for what parts your design will need.</p>
+<h2 id="top-down-design">
+  Top-down design
+  <a class="heading-link" href="#top-down-design">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>However, occasionally, I am faced with a problem space when initially it is unclear to me what a good solution would look like, and thus unclear what components I&rsquo;d need to use to compose the solution, so I don&rsquo;t really know what the first test should do.</p>
+<p>I usually then turn to an experimental mode where I prototype one or more solutions just long enough to come up with a good enough solution to the problem, and which components I&rsquo;d need, and then continue using my usual bottom-up design style.</p>
+<p>But this situation is also where a top-down approach might be better, so when I recently implemented a feature in a web application, I decided I would sharpen my top-down design skills, by designing the feature in a top-down fashion to contrast with my usual bottom-up style, even though I had a fairly good idea of the components involved.</p>
+<div class="notice info">
+  <div class="notice-title">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>Info
+  </div>
+  <div class="notice-content">The code examples are paraphrased from the actual implementation I wrote. I&rsquo;ve left out distracting details and quirks.</div>
+</div>
+
+<h2 id="the-use-case">
+  The use case
+  <a class="heading-link" href="#the-use-case">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>The feature that needed implementing was to provide an endpoint that lets you download log messages from the application, from a known location on the file system. The log messages are stored in a single file per day, named <code>logs-yyyymmdd.log</code>. The spec does not say in which format the logs are, or which format the downloaded log messages should be in.</p>
+<p>I knew the downloaded logs are not ultimately meant to be read by the client, they are to be extracted by the client, and sent to our support team to help the client with troubleshooting. We cannot assume internet connectivity to allow the support team to access the logs themselves.</p>
+<p>Let&rsquo;s assume we can just have the client download a zip archive to send. We can further assume that this implementation does not need to parse the logs.</p>
+<h2 id="setup">
+  Setup
+  <a class="heading-link" href="#setup">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Adding a user-facing feature to a web application typically needs modifications to both the backend and the frontend. If we were truly doing top-down TDD, we should start with a browser UI test engine, such as <a href="https://www.cypress.io/">Cypress</a>, to start with a test that accesses the user interface. You might think that UI-driven tests are cumbersome to write, but I could argue that the reason for that is that we typically only write UI tests as &ldquo;test-after&rdquo;, not in a test-driven manner. But I&rsquo;ll have to expand on TDDing the UI at a different time. This time, I started with the backend implementation.</p>
+<p>If you want to understand the context for the tests and implementation in this post, you can reference <a href="https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-7.0">this example from Microsoft</a> where we have an ASP.NET Core MVC project for the controller, an test project that references the MVC project (and Microsoft.AspNetCore.Mvc.Testing), and a test class with a <a href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.testing.webapplicationfactory-1?source=recommendations&amp;view=aspnetcore-7.0">WebApplicationFactory</a> from which we have gotten a HttpClient, enabling us to communicate with our ASP.NET Core MVC controller.</p>
+<h2 id="the-first-test">
+  The first test
+  <a class="heading-link" href="#the-first-test">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I decided the first test would be to verify the existence of a route to download the logs. In a bottom-up approach, this would be a test I&rsquo;d write much later in the process.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#1e90ff">    [Test]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> <span style="color:#00a">async</span> Task there_is_a_logs_endpoint()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> response = <span style="color:#00a">await</span> _httpClient.GetAsync(<span style="color:#a50">&#34;/api/admin/logs&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>Run the test, to ensure it does not accidentally pass. Then add a rudimentary controller to the MVC project.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#1e90ff">[ApiController]</span>
+</span></span><span style="display:flex;"><span><span style="color:#1e90ff">[Route(&#34;/api/{controller}&#34;)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a">public</span> <span style="color:#00a">class</span> <span style="color:#0a0;text-decoration:underline">AdminController</span> : ControllerBase
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span><span style="color:#1e90ff">    [HttpGet(&#34;logs&#34;)]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> IActionResult GetLogs()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>    	<span style="color:#00a">return</span> Ok();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>and run the tests again to see them pass.</p>
+<p>After this, it is just a matter of adding tests to drive the rest of the implementation. A.k.a <a href="https://www.reddit.com/r/restofthefuckingowl/">Draw the rest of the effing Owl</a> :)</p>
+<h2 id="why-not-a-more-demanding-first-test">
+  Why not a more demanding first test?
+  <a class="heading-link" href="#why-not-a-more-demanding-first-test">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>But seriously, though, why don&rsquo;t we write a first test that forces most of the implementation?</p>
+<p>This is for various reasons. First it suffers from the Ketchup Effect, in that we will get nothing, nothing and then the entire implementation at once when were almost finished with this part. This risks delaying code review feedback. Maybe it is just an hour or two of work to get your test green, in which case it would be fine, but maybe it is more than a day. In my opinion this makes the test feedback loop way too long, and we don&rsquo;t really do TDD at that point, as we don&rsquo;t get much design feedback from our tests if we don&rsquo;t get the red/green/refactor cycle going (or, as I like to say, <em>red/green/reflect</em>) and landing on a state of all tests passing quite often.</p>
+<blockquote>
+<p>The reason I say red/green/reflect instead of is that you should only refactor if, upon reflection, you need to. Don&rsquo;t feel forced to rearrange the code just because the recipe says so. But do take a second to reflect on the code and the design, and where it is headed, and refactor the code, or the design, if it didn&rsquo;t turn out as neat as planned.</p>
+</blockquote>
+<p>Second the tests would stay red most of the time, and this can hide other issues. If you are doing <a href="https://trunkbaseddevelopment.com/">trunk-based development</a>, you cannot do a PR until you&rsquo;ve made all tests green, and this drives the Ketchup Effect. It is much easier to detect a deviation from the entire test suite being green, than from &ldquo;currently some tests are red&rdquo;. If you realize you need to add component A before you can complete your current component, then the failing tests for X and the unfinished state of X may become something of a distraction or hindrance. This is certainly the case if it would take many days to implement the feature to the point where the test passes, and I think this is misapplying top-down TDD - I&rsquo;d certainly switch to bottom-up mode long before that.</p>
+<h2 id="check-the-content-type">
+  Check the content type
+  <a class="heading-link" href="#check-the-content-type">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>We can check the Content Type, which I expect to be <code>application/octet-stream</code>. There seems to be several possible choices for a zip archive so I just picked one.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#1e90ff">    [Test]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> <span style="color:#00a">async</span> Task logs_has_expected_content_type()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> response = <span style="color:#00a">await</span> _httpClient.GetAsync(<span style="color:#a50">&#34;/api/admin/logs&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Assert.That(response.Content.Headers.ContentType?.ToString(), Is.EqualTo(<span style="color:#a50">&#34;application/octet-stream&#34;</span>).IgnoreCase);
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>The diff for the implementation is just replacing the <code>Ok</code> response with a <code>Content</code> response.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-diff" data-lang="diff"><span style="display:flex;"><span><span style="color:#a00">-	return Ok();
+</span></span></span><span style="display:flex;"><span><span style="color:#a00"></span><span style="color:#0a0">+	return Content(&#34;fake log content&#34;, &#34;application/octet-stream&#34;);
+</span></span></span></code></pre></div><h2 id="check-the-file-name">
+  Check the file name
+  <a class="heading-link" href="#check-the-file-name">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>We should also be providing a file name to the user. We also need to allow download of logs from a different day than today. Knowing that the specification states there&rsquo;s a log file per day, we can write a test to pass a date using a query parameter, and check that this date is reflected in the returned file name. This information is found in the Content Disposition header.</p>
+<p>Let&rsquo;s make this a data driven test, to verify that we are not just hard coding the file name.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#1e90ff">    [TestCase(&#34;20221221&#34;)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#1e90ff">    [TestCase(&#34;20010102&#34;)]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> <span style="color:#00a">async</span> Task logs_has_expected_attachment(<span style="color:#0aa">string</span> dateFilter)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> response = <span style="color:#00a">await</span> _httpClient.GetAsync(<span style="color:#a50">$&#34;/api/admin/logs?q={dateFilter}&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Assert.That(response.Content.Headers.ContentDisposition?.FileName, Is.EqualTo(<span style="color:#a50">$&#34;logs-{dateFilter}.zip&#34;</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>To make this pass, first we need add the query parameter to the controller <code>GetLogs</code> method. In ASP.NET MVC this is done with a FromQuery attribute.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-diff" data-lang="diff"><span style="display:flex;"><span><span style="color:#a00">-    public IActionResult GetLogs()
+</span></span></span><span style="display:flex;"><span><span style="color:#a00"></span><span style="color:#0a0">+    public IActionResult GetLogs([FromQuery(Name = &#34;q&#34;)] string? dateFilter)
+</span></span></span></code></pre></div><div class="notice warning">
+  <div class="notice-title">
+    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>Warning
+  </div>
+  <div class="notice-content">If you don&rsquo;t make the parameter nullable (the trailing question mark) and you have <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-reference-types">enabled non-nullable references</a>, it becomes a required parameter. This would fail your previous tests.</div>
+</div>
+
+<p>Further, there&rsquo;s a File result helper in ASP.NET MVC we can use. To make the tests pass, it is sufficient to provide an empty file for now, and use the query parameter to help name the returned file.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-diff" data-lang="diff"><span style="display:flex;"><span><span style="color:#a00">-	return Content(&#34;fake log content&#34;, &#34;application/octet-stream&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#a00"></span><span style="color:#0a0">+	return File(Array.Empty&lt;byte&gt;(), &#34;application/octet-stream&#34;, $&#34;logs-{dateFilter}.zip&#34;);
+</span></span></span></code></pre></div><h2 id="verify-the-date-parameter">
+  Verify the date parameter
+  <a class="heading-link" href="#verify-the-date-parameter">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s check the dateFilter passed in is actually parseable as a date. If it isn&rsquo;t, we can signal failure by returning BadRequest. This is also a good candidate for a data driven test. instead of copy-pasting the same test and just making minor adjustments manually to check various inputs.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#1e90ff">    [TestCase(&#34;20221101&#34;, HttpStatusCode.OK)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#1e90ff">    [TestCase(&#34;12345678&#34;, HttpStatusCode.BadRequest)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#1e90ff">    [TestCase(&#34;humbug&#34;, HttpStatusCode.BadRequest)]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> <span style="color:#00a">async</span> Task logs_query_param_must_be_valid_date(<span style="color:#0aa">string</span> dateFilter, HttpStatusCode expected)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> response = <span style="color:#00a">await</span> _httpClient.GetAsync(<span style="color:#a50">$&#34;/api/admin/logs?q={dateFilter}&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Assert.That(response.StatusCode, Is.EqualTo(expected));
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>To make this pass, we need to add a check in the Controller. We also don&rsquo;t want the current thread culture on the server to affect the outcome, so we use InvariantCulture.
+I didn&rsquo;t actually write a test for this detail, as it is a bit cumbersome to set up a test where I can vary the culture of the server response thread at will.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-diff" data-lang="diff"><span style="display:flex;"><span>     public IActionResult GetLogs([FromQuery(Name = &#34;q&#34;)] string dateFilter)
+</span></span><span style="display:flex;"><span>     {
+</span></span><span style="display:flex;"><span><span style="color:#0a0">+        if (!DateTime.TryParseExact(dateFilter, &#34;yyyyMMdd&#34;, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date))
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+            return BadRequest(&#34;q was not a yyyyMMdd date&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+
+</span></span></span></code></pre></div><div class="notice warning">
+  <div class="notice-title">
+    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>Warning
+  </div>
+  <div class="notice-content">Note that some of our previous tests will now fail, since they were not providing a valid date. You could edit those tests to provide a parameter, or add a default of &ldquo;today&rdquo; to the parameter (by first writing a test for that). I&rsquo;ve left this out of the post.</div>
+</div>
+
+<h2 id="check-that-we-get-a-zip-archive">
+  Check that we get a zip archive
+  <a class="heading-link" href="#check-that-we-get-a-zip-archive">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Now, I want to verify that we actually return a proper zip archive.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#1e90ff">    [Test]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> <span style="color:#00a">async</span> Task logs_returns_zip_archive()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> response = <span style="color:#00a">await</span> _httpClient.GetAsync(<span style="color:#a50">&#34;/api/admin/logs?q=20221101&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Assert.DoesNotThrow(() =&gt; _ = <span style="color:#00a">new</span> ZipArchive(response.Content.ReadAsStream()));
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>To make this pass, let&rsquo;s make the controller return an empty <code>ZipArchive</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>    <span style="color:#00a">public</span> IActionResult GetLogs([FromQuery(Name = <span style="color:#a50">&#34;q&#34;</span>)] <span style="color:#0aa">string</span> dateFilter)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">if</span> (!DateTime.TryParseExact(dateFilter, <span style="color:#a50">&#34;yyyyMMdd&#34;</span>, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, <span style="color:#00a">out</span> <span style="color:#0aa">var</span> date)
+</span></span><span style="display:flex;"><span>            <span style="color:#00a">return</span> BadRequest(<span style="color:#a50">&#34;q was not a yyyyMMdd date&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#aaa;font-style:italic">// write the archive to a memory stream</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> stream = <span style="color:#00a">new</span> MemoryStream();
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">using</span> (<span style="color:#0aa">var</span> archive = <span style="color:#00a">new</span> ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: <span style="color:#00a">true</span>))
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#aaa;font-style:italic">// TODO: write log content to archive</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#aaa;font-style:italic">// then rewind the stream to the beginning</span>
+</span></span><span style="display:flex;"><span>        stream.Seek(<span style="color:#099">0</span>, SeekOrigin.Begin);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">return</span> File(stream, <span style="color:#a50">&#34;application/octet-stream&#34;</span>, <span style="color:#a50">$&#34;logs-{dateFilter}.zip&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><h2 id="check-the-single-file-entry-in-the-zip-archive">
+  Check the single file entry in the zip archive
+  <a class="heading-link" href="#check-the-single-file-entry-in-the-zip-archive">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>To detect that this implementation isn&rsquo;t doing what we want, we can check that there&rsquo;s a single file entry in the <code>ZipArchive</code> with the expected name:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#1e90ff">    [Test]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> <span style="color:#00a">async</span> Task logs_returns_zip_archive_with_the_expected_single_entry()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> response = <span style="color:#00a">await</span> _httpClient.GetAsync(<span style="color:#a50">&#34;/api/admin/logs?q=20221101&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> entries = <span style="color:#00a">new</span> ZipArchive(response.Content.ReadAsStream()).Entries;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Assert.That(entries.Single().Name, Is.EqualTo(<span style="color:#a50">&#34;logs-20221101.log&#34;</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><div class="notice note">
+  <div class="notice-title">
+    <i class="fa fa-sticky-note" aria-hidden="true"></i>Note
+  </div>
+  <div class="notice-content">This test could also be data-driven to try at least two different dates, to show that we are not simply hard-coding the name of the <code>ZipArchive</code> entry</div>
+</div>
+
+<p>And then provide an implementation that adds such an (empty) file entry to the <code>ZipArchive</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-diff" data-lang="diff"><span style="display:flex;"><span>         using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+</span></span><span style="display:flex;"><span>         {
+</span></span><span style="display:flex;"><span><span style="color:#a00">-            // TODO: write log content to archive
+</span></span></span><span style="display:flex;"><span><span style="color:#a00"></span><span style="color:#0a0">+            var entryName = $&#34;logs-{dateFilter}.log&#34;;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+            var entry = archive.CreateEntry(entryName);
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+            // TODO: write log content to entry
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0"></span>         }
+</span></span></code></pre></div><p>Now I had trouble coming up with further tests that didn&rsquo;t include the log contents, so I think it is time to test the reading of the logs in our tests.</p>
+<h2 id="verify-the-log-contents">
+  Verify the log contents
+  <a class="heading-link" href="#verify-the-log-contents">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s write a failing test that verifies that if the logs contain some known log data, this ends up in our downloaded <code>ZipArchive</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#1e90ff">    [Test]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> <span style="color:#00a">async</span> Task logs_returns_the_expected_log_contents()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> response = <span style="color:#00a">await</span> _httpClient.GetAsync(<span style="color:#a50">&#34;/api/admin/logs?q=20221101&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> archive = <span style="color:#00a">new</span> ZipArchive(response.Content.ReadAsStream());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">using</span> <span style="color:#0aa;text-decoration:underline">var</span> streamReader = <span style="color:#00a">new</span> StreamReader(archive.Entries.Single().Open());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> lines = <span style="color:#00a">new</span> List&lt;<span style="color:#0aa">string?</span>&gt;();
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">while</span>(!streamReader.EndOfStream)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            lines.Add(<span style="color:#00a">await</span> streamReader.ReadLineAsync());
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Assert.That(lines, Is.EquivalentTo(<span style="color:#00a">new</span> []{<span style="color:#a50">&#34;SOME&#34;</span>, <span style="color:#a50">&#34;LOG&#34;</span>, <span style="color:#a50">&#34;ENTRIES&#34;</span>}));
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>This will fail because we are just returning an empty zip file entry. There are several ways to make this new test pass</p>
+<ul>
+<li>We could take actual logs that the application previously wrote to file, include them in the test project, and have the controller read the logs from there, and check that the first few lines match.</li>
+<li>We could manually create a log file with these entries, and have the controller read that.</li>
+<li>We could add a log reader constructor parameter to the controller, which would enable us to inject a fake log reader component in our tests, and can provide us with a known set of log entries.</li>
+</ul>
+<p>The log reader constructor parameter is a great fit for <a href="https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-7.0">Dependency Injection, which is already heavily used in a typical ASP.NET project</a>, and I think this is the better option here.</p>
+<blockquote>
+<p>Having the tests read actual log files would provide some evidence that we can handle the real log format, but we would probably have to do a manual copy of a real log file into the test project, and then remember to keep the log file up-to-date if the log format ever changed, to keep that benefit. It would be better to provide an integration test that started the application, and then read some of the real logs just written, but I&rsquo;ll leave that out of this post.</p>
+</blockquote>
+<h2 id="adding-a-logs-reader-abstraction">
+  Adding a Logs Reader abstraction
+  <a class="heading-link" href="#adding-a-logs-reader-abstraction">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Let&rsquo;s rewire things so we are able to inject a fake logs reader implementation during testing, that will pretend to read those lines from the logs. To be able to use DI, we add an interface <code>ILogsReader</code>, which can be empty for now.</p>
+<p>To configure DI for tests, we can add an empty test class <code>FakeLogsReader</code>, implementing <code>ILogsReader</code>, which we leave empty for now, and add this registration to test DI, much like as described in <a href="https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-7.0">the integration test example from Microsoft I mentioned earlier</a>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>	services.AddSingleton&lt;ILogsReader, FakeLogsReader&gt;();
+</span></span></code></pre></div><p>If we add an <code>ILogsReader</code> constructor parameter in our controller, it will be provided with a <code>FakeLogsReader</code> during testing.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-diff" data-lang="diff"><span style="display:flex;"><span><span style="color:#0a0">+    private readonly ILogsReader _logsReader;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0"></span><span style="color:#a00">-    public AdminController()
+</span></span></span><span style="display:flex;"><span><span style="color:#a00"></span><span style="color:#0a0">+    public AdminController(ILogsReader logsReader)
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+    {
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+        _logsReader = logsReader;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0"></span>     }
+</span></span></code></pre></div><div class="notice warning">
+  <div class="notice-title">
+    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>Warning
+  </div>
+  <div class="notice-content">Depending on your test and service setup, adding this parameter might cause failures that complain that you have no implementation available for <code>ILogsReader</code> when not running with the test DI container where you registered the implementation. You could write a test that verifies that the real DI contains an implementation of the <code>ILogsReader</code>. This DI-test will fail, until you add an empty class <code>LogsReader</code>, implementing <code>ILogsReader</code> and registering this in the real DI container. I&rsquo;ve left these details out of this post.</div>
+</div>
+
+<p>Also, the implementation of <code>GetLogs</code> in the controller needs to be changed to utilize our new reader. Let&rsquo;s imagine we have a <code>ReadLogEntries</code> method that returns a list of log entries, this would help us implement the following:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-diff" data-lang="diff"><span style="display:flex;"><span>             var entry = archive.CreateEntry(entryName);
+</span></span><span style="display:flex;"><span><span style="color:#a00">-            // TODO: write log content to entry
+</span></span></span><span style="display:flex;"><span><span style="color:#a00"></span><span style="color:#0a0">+            using (var writer = new StreamWriter(entry.Open()))
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+            {
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+                foreach (var logEntry in _logsReader.ReadLogEntries(date))
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+                    writer.Write(logEntry + &#34;\n&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0">+            }
+</span></span></span></code></pre></div><p>For this to compile, we need to add <code>ReadLogEntries</code> to the <code>ILogsReader</code> interface.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#00a">public</span> <span style="color:#00a">interface</span> <span style="color:#0a0;text-decoration:underline">ILogsReader</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	IEnumerable&lt;<span style="color:#0aa">string</span>&gt; ReadLogEntries(DateTime date);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>and we&rsquo;ll need to add an implementation of this method to our implementations of <code>ILogsReader</code>.</p>
+<p>We can make <code>FakeLogsReader</code> provide the expected entries directly.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#00a">public</span> <span style="color:#00a">class</span> <span style="color:#0a0;text-decoration:underline">FakeLogsReader</span> : ILogsReader
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> IEnumerable&lt;<span style="color:#0aa">string</span>&gt; ReadLogEntries(DateTime date) =&gt; <span style="color:#00a">new</span> [] {
+</span></span><span style="display:flex;"><span>    	<span style="color:#a50">&#34;SOME&#34;</span>, <span style="color:#a50">&#34;LOG&#34;</span>, <span style="color:#a50">&#34;ENTRIES&#34;</span>
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Now the test should pass.</p>
+<h2 id="improvements-to-the-tests">
+  Improvements to the tests
+  <a class="heading-link" href="#improvements-to-the-tests">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>A more sophisticated approach, and one that I would go for in a production setting, would be to allow each test to tell the <code>FakeLogsReader</code> what log contents should be returned for the following request, but this would require some plumbing to set up DI-overrides per test, and care that you are not affecting other tests if a singleton <code>FakeLogsReader</code> is used from many tests in parallel.</p>
+<p>Also worth mentioning is that there&rsquo;s some duplication creeping up in the tests, and I&rsquo;d refactor the tests to use some helper functions, for example one that does the request, and unpacks the returned ZipArchive, and one that builds the logs request URL. Removing duplication is something most developers naturally do in production code, but it is also important to avoid duplication in test code. Don&rsquo;t go complaining TDD &ldquo;slows you down&rdquo; when you needed to change the same thing in 50 different tests, just because you didn&rsquo;t care about the duplication when you wrote the tests.</p>
+<p>However, I&rsquo;ve left this cleanup out of this post.</p>
+<h2 id="adding-a-logs-packager-abstraction">
+  Adding a Logs Packager abstraction
+  <a class="heading-link" href="#adding-a-logs-packager-abstraction">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>At this point, when all tests were passing, I decided to refactor the controller, to move the business logic for packaging log entries into a <code>ZipArchive</code> out of the body of <code>GetLogs</code>.</p>
+<blockquote>
+<p>In general, controllers should be very thin layers on top of your business logic, and you should put a minimum amount of business logic in them. As the project grows, and you need to verify more complex interactions in the business logic, it becomes increasingly complex and time-consuming to verify via the controllers (both in effort, and time to run the tests).</p>
+<p>What we could be testing using a method call, is instead using a simulated browser, doing routing, parameter binding, authentication and authorization, serialization and deserialization, just to verify the details of the behavior. To be clear, we want to test those things, but we don&rsquo;t need to include them in each and every test. Stuffing the controller full of business logic also makes it harder to re-use the business logic elsewhere in a non-HTTP context.</p>
+</blockquote>
+<p>To this end I added a new interface <code>ILogsPackager</code></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#00a">public</span> <span style="color:#00a">interface</span> <span style="color:#0a0;text-decoration:underline">ILogsPackager</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    Stream GetLogArchive(DateTime date);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>and an implementing class, with our implementation so far.</p>
+<blockquote>
+<p>The <code>LogsPackager</code> below is not a test class or &ldquo;fake&rdquo; implementation, as we don&rsquo;t need a test version of the packaging itself. As it does not depend on external things apart from the <code>ILogsReader</code>, we only need the real implementation of the packager. This implementation is then easily tested in isolation by providing it with a fake <code>ILogsReader</code>.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#00a">public</span> <span style="color:#00a">class</span> <span style="color:#0a0;text-decoration:underline">LogsPackager</span> : ILogsPackager
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">private</span> <span style="color:#00a">readonly</span> ILogsReader _logsReader;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> LogsPackager(ILogsReader logsReader)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        _logsReader = logsReader;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> Stream GetLogArchive(DateTime date)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#aaa;font-style:italic">// write the archive to a memory stream</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#0aa">var</span> stream = <span style="color:#00a">new</span> MemoryStream();
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">using</span> (<span style="color:#0aa">var</span> archive = <span style="color:#00a">new</span> ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: <span style="color:#00a">true</span>))
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#0aa">var</span> entryName = <span style="color:#a50">$&#34;logs-{date:yyyyMMdd}.log&#34;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#0aa">var</span> entry = archive.CreateEntry(entryName);
+</span></span><span style="display:flex;"><span>            <span style="color:#00a">using</span> (<span style="color:#0aa">var</span> writer = <span style="color:#00a">new</span> StreamWriter(entry.Open()))
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#00a">foreach</span> (<span style="color:#0aa">var</span> logEntry <span style="color:#00a">in</span> _logsReader.ReadLogEntries(date))
+</span></span><span style="display:flex;"><span>                    writer.Write(logEntry + <span style="color:#a50">&#34;\n&#34;</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#aaa;font-style:italic">// then rewind the stream to the beginning</span>
+</span></span><span style="display:flex;"><span>        stream.Seek(<span style="color:#099">0</span>, SeekOrigin.Begin);
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">return</span> stream;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>and a refactoring of the controller to depend on <code>ILogsPackager</code>, instead of directly on the <code>ILogsReader</code></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-diff" data-lang="diff"><span style="display:flex;"><span><span style="color:#a00">-    private readonly ILogsReader _logsReader;
+</span></span></span><span style="display:flex;"><span><span style="color:#a00"></span><span style="color:#0a0">+    private readonly ILogsPackager _logsPackager;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0"></span>
+</span></span><span style="display:flex;"><span><span style="color:#a00">-    public AdminController(ILogsReader logsReader)
+</span></span></span><span style="display:flex;"><span><span style="color:#a00"></span><span style="color:#0a0">+    public AdminController(ILogsPackager logsPackager)
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0"></span>     {
+</span></span><span style="display:flex;"><span><span style="color:#a00">-        _logsReader = logsReader;
+</span></span></span><span style="display:flex;"><span><span style="color:#a00"></span><span style="color:#0a0">+        _logsPackager = logsPackager;
+</span></span></span><span style="display:flex;"><span><span style="color:#0a0"></span>         _settings = settings;
+</span></span><span style="display:flex;"><span>     }
+</span></span></code></pre></div><p>a refactoring of the <code>GetLogs</code> method in the controller</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>    <span style="color:#00a">public</span> IActionResult GetLogs([FromQuery(Name = <span style="color:#a50">&#34;q&#34;</span>)] <span style="color:#0aa">string</span> dateFilter)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">if</span> (!DateTime.TryParseExact(dateFilter, <span style="color:#a50">&#34;yyyyMMdd&#34;</span>, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, <span style="color:#00a">out</span> <span style="color:#0aa">var</span> date)
+</span></span><span style="display:flex;"><span>            <span style="color:#00a">return</span> BadRequest(<span style="color:#a50">&#34;q was not a yyyyMMdd date&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#0aa">var</span> stream = _logsPackager.GetLogArchive(date);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        IActionResult logData = File(stream, <span style="color:#a50">&#34;application/octet-stream&#34;</span>, <span style="color:#a50">$&#34;logs-{dateFilter}.zip&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">return</span> Task.FromResult(logData);
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>And, after adding a registration for <code>ILogsPackager</code> to DI, the tests should pass after this refactoring.</p>
+<h2 id="what-have-we-done">
+  What have we done?
+  <a class="heading-link" href="#what-have-we-done">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>At this point maybe it is helpful to look at this class diagram displaying the relationship between the components we&rsquo;ve created so far. A couple of interfaces, and classes implementing them, or depending on them, and Dependency Injection composing these together.</p>
+<div class="mermaid">
+classDiagram
+FakeLogsReader --> LogsPackager: injected into
+LogsPackager --> AdminController: injected into
+
+LogsPackager --|> ILogsPackager: implements
+FakeLogsReader --|> ILogsReader: implements
+
+AdminController ..> ILogsPackager: depends on
+LogsPackager ..> ILogsReader: depends on
+
+AdminController: +GetLogs(string dateFilter) IActionResult
+ILogsReader : +ReadLogEntries(DateTime date) IEnumerable~string~
+ILogsPackager : +GetLogArchive(DateTime date) Stream
+
+</div>
+
+<h2 id="start-testing-on-a-lower-level">
+  Start testing on a lower level
+  <a class="heading-link" href="#start-testing-on-a-lower-level">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>We can now add some tests for the <code>ILogsPackager</code> as well. We can just copy the previous test for the controller, and remove some of the browser setup and response handling, manually create a <code>LogsPackager</code> and just call <code>GetLogArchive</code> directly. This is essentially the same test, but it avoids the entire HTTP request/response plumbing and thus runs much much faster.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#1e90ff">    [Test]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">public</span> <span style="color:#00a">async</span> Task packager_returns_the_expected_log_contents()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> logsReader = <span style="color:#00a">new</span> FakeLogsReader();
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> packager = <span style="color:#00a">new</span> LogsPackager(logsReader);
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">using</span> <span style="color:#0aa;text-decoration:underline">var</span> archive = packager.GetLogArchive(<span style="color:#a50">&#34;logs&#34;</span>, <span style="color:#00a">new</span> Date(<span style="color:#099">2022</span>, <span style="color:#099">11</span>, <span style="color:#099">01</span>));
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">using</span> <span style="color:#0aa;text-decoration:underline">var</span> streamReader = <span style="color:#00a">new</span> StreamReader(archive.Entries.Single().Open());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">var</span> lines = <span style="color:#00a">new</span> List&lt;<span style="color:#0aa">string?</span>&gt;();
+</span></span><span style="display:flex;"><span>        <span style="color:#00a">while</span>(!streamReader.EndOfStream)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            lines.Add(<span style="color:#00a">await</span> streamReader.ReadLineAsync());
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Assert.That(lines, Is.EquivalentTo(<span style="color:#00a">new</span> []{<span style="color:#a50">&#34;SOME&#34;</span>, <span style="color:#a50">&#34;LOG&#34;</span>, <span style="color:#a50">&#34;ENTRIES&#34;</span>}));
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><blockquote>
+<p>Is the corresponding test from the controller tests now redundant? I don&rsquo;t think so, since the above test does not cover testing that the parts work well together with the controller and that the dependencies can be automatically composed via DI.</p>
+</blockquote>
+<h2 id="whats-left">
+  What&rsquo;s left?
+  <a class="heading-link" href="#whats-left">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>To complete the feature, we would need to add unit tests for a production <code>ILogsReader</code> implementation, to verify it can read log entries from some configured location in the file system. I&rsquo;d be fairly confident that this implementation will work fine with the LogsPackager, but maybe I&rsquo;d write an integration test to verify all production components work fine together. For the actual customer case that this post is based on, I added a simple UI to enter a date, and a button to download the corresponding logs, with tests of course.</p>
+<h2 id="conclusion">
+  Conclusion
+  <a class="heading-link" href="#conclusion">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>For me, this was an interesting TDD experiment, working top-down instead of my normal bottom-up style. I will use it more in the future, especially when I don&rsquo;t have a clear picture of which parts are needed to solve the problem, or how they best fit together. In such cases, I think the top-down style helps guide the implementation, and once a cohesive part has formed, it can be refactored into one or more components, which may then be broken down into further parts when new tests forces me to complete more of the implementation.</p>
+<p>I think one of the pitfalls of using top-down TDD could be to lead someone to put all business logic in the &ldquo;first place it fits&rdquo;, which in this example would be the HTTP controller (generally a bad idea as explained above) and it would take some discipline and end up with less composable code - whereas in bottom-up style I think you&rsquo;d more naturally end up with a good separation of controller and business logic, as you&rsquo;d basically be forced to start unit testing the LogsReader or LogsPackager without involving the HTTP layer.</p>
+<p>We might get tempted to add a lot of implementation tests early, when we are limited to our costly HTTP integration tests like the controller tests in this post</p>
+<blockquote>
+<p>Note that here I&rsquo;m using &ldquo;integration test&rdquo; I mean &ldquo;component integration tests&rdquo; that runs in-process, here simulating the HTTP request/response cycle without actually doing cross process/host network communication. I am not talking about the system integration tests that you&rsquo;d write to start a whole system, composed with production components as far as possible, which typically includes real network communication between services, and between the test runner and the system you are testing. The line is somewhat blurred by features like <a href="https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-7.0">ASP.NET WebApplicationFactory enabling in-process integration tests with test or production components</a>.</p>
+</blockquote>
+<p>Tests to check the exact details of the business logic, to get 100% code coverage so to speak, are possible to write as either (component) integration or unit tests, but are best left as unit tests, simply due to the fact that &ldquo;pure&rdquo; unit tests are at least 10 times faster to run. When you have thousands of tests, it will make a big difference in test run-time.</p>
+<p>There&rsquo;s of course an inverse to this, which is that when doing bottom-up TDD, you might think your component is so well unit-tested that you don&rsquo;t put much effort into either component or system integration tests. The number of times I&rsquo;ve just made a small change, and mistakenly thought that it &ldquo;couldn&rsquo;t possibly affect anything else&rdquo;, finding the components not actually working together as well as I thought, tells me this is an actual downside of focusing too much on the individual parts. Either extreme is to be avoided. Me personally, I think I&rsquo;ll keep mostly doing bottom-up, but will try to remember top-down when I&rsquo;m unsure about the direction to go.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+      2011 -
+    
+    2023
+     Martin Hellspong 
+    ·
+    
+    Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@9.3.0/dist/mermaid.min.js" integrity="sha256-QdTG1YTLLTwD3b95jLqFxpQX9uYuJMNAtVZgwKX4oYU=" crossorigin="anonymous"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

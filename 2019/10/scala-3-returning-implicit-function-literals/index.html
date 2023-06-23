@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>
+  Scala 3: Returning implicit function literals · Recurse.se
+</title>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Martin Hellspong">
+<meta name="description" content="When I recently looked at implicit functions in Scala 3 (still only available as a pre-release compiler codenamed &lsquo;Dotty&rsquo;) I wondered: What if we need to perform an expensive operation before returning an implicit function literal?
+This turned out to be a lot harder to achieve than I anticipated. Lets first look at how this can be done via an ordinary lambda function, though, before going any further.
+(You can try this out in the dotty REPL, dotr)">
+<meta name="keywords" content="blog,developer,personal,software,programming">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Scala 3: Returning implicit function literals"/>
+<meta name="twitter:description" content="When I recently looked at implicit functions in Scala 3 (still only available as a pre-release compiler codenamed &lsquo;Dotty&rsquo;) I wondered: What if we need to perform an expensive operation before returning an implicit function literal?
+This turned out to be a lot harder to achieve than I anticipated. Lets first look at how this can be done via an ordinary lambda function, though, before going any further.
+(You can try this out in the dotty REPL, dotr)"/>
+
+<meta property="og:title" content="Scala 3: Returning implicit function literals" />
+<meta property="og:description" content="When I recently looked at implicit functions in Scala 3 (still only available as a pre-release compiler codenamed &lsquo;Dotty&rsquo;) I wondered: What if we need to perform an expensive operation before returning an implicit function literal?
+This turned out to be a lot harder to achieve than I anticipated. Lets first look at how this can be done via an ordinary lambda function, though, before going any further.
+(You can try this out in the dotty REPL, dotr)" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://recurse.se/2019/10/scala-3-returning-implicit-function-literals/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-10-02T07:29:17+00:00" />
+<meta property="article:modified_time" content="2019-10-02T07:29:17+00:00" />
+
+
+
+
+<link rel="canonical" href="https://recurse.se/2019/10/scala-3-returning-implicit-function-literals/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.36f76aaf39a14ecf5c3a3c6250dcaf06c238b3d8365d17d646f95cb1874e852b.css" integrity="sha256-NvdqrzmhTs9cOjxiUNyvBsI4s9g2XRfWRvlcsYdOhSs=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+<meta name="generator" content="Hugo 0.114.1">
+
+
+
+
+
+  </head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Recurse.se
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/tags/">Tags</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://github.com/marhel"></a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://recurse.se/2019/10/scala-3-returning-implicit-function-literals/">
+              Scala 3: Returning implicit function literals
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2019-10-02T07:29:17Z">
+                October 2, 2019
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              6-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/scala/">Scala</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <p>When <a href="/2019/09/implicit-functions-in-scala-3">I recently looked at implicit functions in Scala 3</a> (still only available as a <a href="https://dotty.epfl.ch/">pre-release compiler codenamed &lsquo;Dotty&rsquo;</a>) I wondered: <strong>What if we need to perform an expensive operation before returning an implicit function literal?</strong></p>
+<p>This turned out to be a lot harder to achieve than I anticipated. Lets first look at how this can be done via an ordinary lambda function, though, before going any further.</p>
+<p>(You can try this out in the dotty REPL, dotr)</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">case</span> <span style="color:#00a">class</span> <span style="color:#0a0;text-decoration:underline">Person</span>(name<span style="color:#00a">:</span> <span style="color:#0aa">String</span>, age<span style="color:#00a">:</span> <span style="color:#0aa">Int</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a">def</span> calculateAverageAge()<span style="color:#00a">:</span> <span style="color:#0aa">Int</span> = {
+</span></span><span style="display:flex;"><span>    <span style="color:#aaa;font-style:italic">// assume some expensive calculation needs to be done
+</span></span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic"></span>    println(<span style="color:#a50">&#34;expensive calculation&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#099">42</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00a">def</span> olderThanAverage() <span style="color:#00a">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">val</span> average <span style="color:#00a">=</span> calculateAverageAge()
+</span></span><span style="display:flex;"><span>    (p<span style="color:#00a">:</span> <span style="color:#0aa">Person</span>) <span style="color:#00a">=&gt;</span> p.age &gt; average
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>scala&gt; <span style="color:#00a">val</span> oldieCheck <span style="color:#00a">=</span> olderThanAverage()
+</span></span><span style="display:flex;"><span>expensive calculation
+</span></span><span style="display:flex;"><span><span style="color:#00a">val</span> oldieCheck<span style="color:#00a">:</span> <span style="color:#0aa">Person</span> =&gt; <span style="color:#0a0;text-decoration:underline">Boolean</span> <span style="color:#00a">=</span> <span style="color:#0a0;text-decoration:underline">Lambda$1530</span>/<span style="color:#099">0x000000080100d840</span><span style="color:#00a">@</span><span style="color:#099">749</span>ee0e3
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>scala&gt; <span style="color:#00a">val</span> isOld <span style="color:#00a">=</span> oldieCheck(<span style="color:#0a0;text-decoration:underline">Person</span>(<span style="color:#a50">&#34;Greta&#34;</span>, <span style="color:#099">16</span>))
+</span></span><span style="display:flex;"><span><span style="color:#00a">val</span> isOld<span style="color:#00a">:</span> <span style="color:#0aa">Boolean</span> = <span style="color:#00a">false</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>scala&gt; <span style="color:#00a">val</span> isOld <span style="color:#00a">=</span> oldieCheck(<span style="color:#0a0;text-decoration:underline">Person</span>(<span style="color:#a50">&#34;Ford&#34;</span>, <span style="color:#099">200</span>))
+</span></span><span style="display:flex;"><span><span style="color:#00a">val</span> isOld<span style="color:#00a">:</span> <span style="color:#0aa">Boolean</span> = <span style="color:#00a">true</span>
+</span></span></code></pre></div><p>Here, we can see that the expensive calculation is performed only once. Is is performed when declaring <code>oldieCheck</code> which calls the <code>olderThanAverage</code> function, which first performs the expensive calculation, and then returns a lambda that uses the calculated value. The oldieCheck can be called several times without needing to perform the expensive calculation again.</p>
+<p>Now, we want to do the same thing, but this time using implicit functions!</p>
+<p>Our first try might be;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">def</span> olderThanAverage1() <span style="color:#00a">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">val</span> average <span style="color:#00a">=</span> calculateAverageAge()
+</span></span><span style="display:flex;"><span>    (given p<span style="color:#00a">:</span> <span style="color:#0aa">Person</span>) <span style="color:#00a">=&gt;</span> p.age &gt; average
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>But this does not even compile (you get <code>no implicit argument of type Person was found for parameter of (given Person) =&gt; Boolean)</code> unless you have an implicit Person in scope. This is because <code>olderThanAverage1</code> is inferred to have a Boolean return type, and compiler is trying to get a Boolean by immediately executing the implicit function!</p>
+<p>This means that if you do have an implicit Person in scope, say <code>Person(&quot;Ford&quot;, 200)</code>, then <code>olderThanAverage1</code> compiles, but is forever bound to this Person and will not even return a lambda, but a constant <code>true</code> value. Not what we wanted.</p>
+<p>A second try might be to explicitly state the return type;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">def</span> olderThanAverage2()<span style="color:#00a">:</span> (<span style="color:#0aa">given</span> <span style="color:#0aa">Person</span>) =&gt; <span style="color:#0a0;text-decoration:underline">Boolean</span> <span style="color:#00a">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">val</span> average <span style="color:#00a">=</span> calculateAverageAge()
+</span></span><span style="display:flex;"><span>    (given p<span style="color:#00a">:</span> <span style="color:#0aa">Person</span>) <span style="color:#00a">=&gt;</span> p.age &gt; average
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>this also doesn&rsquo;t compile, because it expects the last statement to have Boolean return type. To understand these behaviors, we need to look at the Rewrite Rule in the Scala 3 spec;</p>
+<blockquote>
+<p>Implicit function literals (given x1: T1, &hellip;, xn: Tn) =&gt; e are automatically created for any expression e whose expected type is ImplicitFunctionN[T1, &hellip;, Tn, R], unless e is itself a implicit function literal.</p>
+</blockquote>
+<p>In these cases the compiler sees that the function body block has implicit function type, and is not itself an implicit function literal (it&rsquo;s a block returning one), so it adds another <code>(given p: Person) =&gt;</code> before the block to make the entire expression an implicit function literal, expecting the block itself to return a Boolean. Please see the discussion on the Rewrite Rule in <a href="/2019/09/implicit-functions-in-scala-3">my previous post</a> if this is unclear.</p>
+<p>We can try to explicitly use the return keyword to return the implicit function, which is normally not needed in Scala code:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">def</span> olderThanAverage3()<span style="color:#00a">:</span> (<span style="color:#0aa">given</span> <span style="color:#0aa">Person</span>) =&gt; <span style="color:#0a0;text-decoration:underline">Boolean</span> <span style="color:#00a">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">val</span> average <span style="color:#00a">=</span> calculateAverageAge()
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">return</span> (given p<span style="color:#00a">:</span> <span style="color:#0aa">Person</span>) <span style="color:#00a">=&gt;</span> p.age &gt; average
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>However, this in fact crashes the dotr 0.19-RC1 REPL with <code>Exception in thread &quot;main&quot; java.lang.IllegalArgumentException: Could not find proxy for val nonLocalReturnKey1: Object in List(val nonLocalReturnKey1, method olderThanAverage3</code>!</p>
+<p>A fourth try could be to return the lambda indirectly:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">def</span> olderThanAverage4()<span style="color:#00a">:</span> (<span style="color:#0aa">given</span> <span style="color:#0aa">Person</span>) =&gt; <span style="color:#0a0;text-decoration:underline">Boolean</span> <span style="color:#00a">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">val</span> average <span style="color:#00a">=</span> calculateAverageAge()
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">val</span> aboveAverage <span style="color:#00a">=</span> (given p<span style="color:#00a">:</span> <span style="color:#0aa">Person</span>) <span style="color:#00a">=&gt;</span> p.age &gt; average
+</span></span><span style="display:flex;"><span>    aboveAverage
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This compiles, but does not work as intended, since if we then try to use the function, by</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">val</span> oldieCheck <span style="color:#00a">=</span> olderThanAverage4()
+</span></span></code></pre></div><p>it does not compile due to the lack of an implicit Person (i.e. we are trying to eagerly bind to an implicit to produce a Boolean value for oldieCheck, not a lambda). If we rewrite the check with an explicit return type;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">val</span> oldieCheck<span style="color:#00a">:</span> (<span style="color:#0aa">given</span> <span style="color:#0aa">Person</span>) =&gt; <span style="color:#0a0;text-decoration:underline">Boolean</span> <span style="color:#00a">=</span> olderThanAverage4()
+</span></span></code></pre></div><p>It compiles, but the expensive operation is now executed on each invocation of oldieCheck. This again is explained by looking at the rewriting done by the compiler as per the Rewrite Rule;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">def</span> olderThanAverage4() <span style="color:#00a">=</span> (given p1<span style="color:#00a">:</span> <span style="color:#0aa">Person</span>) <span style="color:#00a">=&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">val</span> average <span style="color:#00a">=</span> calculateAverageAge()
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">val</span> aboveAverage <span style="color:#00a">=</span> (given p2<span style="color:#00a">:</span> <span style="color:#0aa">Person</span>) <span style="color:#00a">=&gt;</span> p.age &gt; average
+</span></span><span style="display:flex;"><span>    aboveAverage
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>So, after the rewrite, our expensive calculation is now inside the body of the returned lambda, and will be executed on each invocation of the lambda.</p>
+<p>So, we have not found a working solution, apart from the first one using an ordinary lambda. But what if we combine the two approaches, and try to return a lambda that returns the implicit function we want? Let&rsquo;s try that out:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">def</span> olderThanAverage5() <span style="color:#00a">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">val</span> average <span style="color:#00a">=</span> calculateAverageAge()
+</span></span><span style="display:flex;"><span>    <span style="color:#aaa;font-style:italic">// return a lambda that will return the implicit function
+</span></span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic"></span>    () <span style="color:#00a">=&gt;</span> (given p<span style="color:#00a">:</span> <span style="color:#0aa">Person</span>) <span style="color:#00a">=&gt;</span> p.age &gt; average
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>scala&gt; <span style="color:#00a">val</span> oldieCheckGenerator <span style="color:#00a">=</span> olderThanAverage5()
+</span></span><span style="display:flex;"><span>expensive calculation
+</span></span><span style="display:flex;"><span><span style="color:#00a">val</span> oldieCheckGenerator<span style="color:#00a">:</span> () =&gt; (given <span style="color:#0a0;text-decoration:underline">Person</span>) <span style="color:#00a">=&gt;</span> <span style="color:#0a0;text-decoration:underline">Boolean</span> <span style="color:#00a">=</span> <span style="color:#0a0;text-decoration:underline">Lambda$1646</span>/<span style="color:#099">0x0000000801166440</span><span style="color:#00a">@</span><span style="color:#099">2</span>e096ac0
+</span></span></code></pre></div><p>Now, declaring <code>oldieCheckGenerator</code> executed the expensive calculation, and returned a lambda that can give us the implict function we want.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span>scala&gt; <span style="color:#00a">val</span> oldieCheck<span style="color:#00a">:</span> (<span style="color:#0aa">given</span> <span style="color:#0aa">Person</span>) =&gt; <span style="color:#0a0;text-decoration:underline">Boolean</span> <span style="color:#00a">=</span> oldieCheckGenerator()
+</span></span><span style="display:flex;"><span><span style="color:#00a">val</span> oldieCheck<span style="color:#00a">:</span> (<span style="color:#0aa">given</span> <span style="color:#0aa">Person</span>) =&gt; <span style="color:#0a0;text-decoration:underline">Boolean</span> <span style="color:#00a">=</span> <span style="color:#0a0;text-decoration:underline">Lambda$1690</span>/<span style="color:#099">0x0000000801189840</span><span style="color:#00a">@</span><span style="color:#099">28532753</span>
+</span></span></code></pre></div><p>We need to be explicit about the type of oldieCheck, as above, or it&rsquo;ll be inferred to be a Boolean, not a function type.</p>
+<p>Now we can can call oldieCheck, explicitly passing in a Person;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span>scala&gt; <span style="color:#00a">val</span> isOld <span style="color:#00a">=</span> oldieCheck(given <span style="color:#0a0;text-decoration:underline">Person</span>(<span style="color:#a50">&#34;Greta&#34;</span>, <span style="color:#099">16</span>))
+</span></span><span style="display:flex;"><span><span style="color:#00a">val</span> isOld<span style="color:#00a">:</span> <span style="color:#0aa">Boolean</span> = <span style="color:#00a">false</span>
+</span></span></code></pre></div><p>or just execute it if we have an implicit Person in scope;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span>given <span style="color:#0a0;text-decoration:underline">Person</span> <span style="color:#00a">=</span> <span style="color:#0a0;text-decoration:underline">Person</span>(<span style="color:#a50">&#34;Ford&#34;</span>, <span style="color:#099">200</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>scala&gt; <span style="color:#00a">val</span> isOld <span style="color:#00a">=</span> oldieCheck
+</span></span><span style="display:flex;"><span><span style="color:#00a">val</span> isOld<span style="color:#00a">:</span> <span style="color:#0aa">Boolean</span> = <span style="color:#00a">true</span>
+</span></span></code></pre></div><p>And neither execution of oldieCheck needed to perform the expensive calculation again.</p>
+<p>Please note that if you try to be clever and bypass storing the lambda in the oldieCheckGenerator, as in</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// call the expensive function to get the lambda
+</span></span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// and immediately execute the lambda to get the 
+</span></span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// implicit function
+</span></span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic"></span><span style="color:#00a">val</span> badOldieCheck<span style="color:#00a">:</span> (<span style="color:#0aa">given</span> <span style="color:#0aa">Person</span>) =&gt; <span style="color:#0a0;text-decoration:underline">Boolean</span> <span style="color:#00a">=</span> olderThanAverage5()()
+</span></span></code></pre></div><p>This will not work as intended, and again we are tripped up by the Rewrite Rule, as the above will be rewritten into</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">val</span> badOldieCheck <span style="color:#00a">=</span> (given <span style="color:#0a0;text-decoration:underline">Person</span>) <span style="color:#00a">=&gt;</span> olderThanAverage5()()
+</span></span></code></pre></div><p>which again moves the expensive part into the implicit function. In fact, we can now realize that the intermediate oldieCheckGenerator lambda is invoked on each call of oldieCheck for the same reason, but as this is not an expensive operation, it has no performance impact.</p>
+<p>So, the answer to the original question is; <strong>You cannot return an implicit function literal from a block due to the Rewrite Rule. However, you can get around this limitation by returning an ordinary lambda that returns the implicit function</strong>.</p>
+<p>I guess we&rsquo;ll have to wait and see if the Scala 3 release will make this easier.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+      2011 -
+    
+    2023
+     Martin Hellspong 
+    ·
+    
+    Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
