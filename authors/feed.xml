@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Authors on Recurse.se</title>
-    <link>https://blog.recurse.se/authors/</link>
+    <link>https://recurse.se/authors/</link>
     <description>Recent content in Authors on Recurse.se</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 04 Jan 2023 10:59:42 +0100</lastBuildDate><atom:link href="https://blog.recurse.se/authors/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 04 Jan 2023 10:59:42 +0100</lastBuildDate><atom:link href="https://recurse.se/authors/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Martin Hellspong</title>
-      <link>https://blog.recurse.se/authors/martin-hellspong/</link>
+      <link>https://recurse.se/authors/martin-hellspong/</link>
       <pubDate>Wed, 04 Jan 2023 10:59:42 +0100</pubDate>
       
-      <guid>https://blog.recurse.se/authors/martin-hellspong/</guid>
+      <guid>https://recurse.se/authors/martin-hellspong/</guid>
       <description>Hello, I&amp;rsquo;m Martin, the main author of the recurse.se blog.
 Please read the about page for more info about me.</description>
     </item>

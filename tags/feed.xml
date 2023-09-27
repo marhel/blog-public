@@ -2,71 +2,71 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Recurse.se</title>
-    <link>https://blog.recurse.se/tags/</link>
+    <link>https://recurse.se/tags/</link>
     <description>Recent content in Tags on Recurse.se</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 23 Jun 2023 18:13:42 +0200</lastBuildDate><atom:link href="https://blog.recurse.se/tags/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 23 Jun 2023 18:13:42 +0200</lastBuildDate><atom:link href="https://recurse.se/tags/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>ASP.NET</title>
-      <link>https://blog.recurse.se/tags/asp.net/</link>
+      <link>https://recurse.se/tags/asp.net/</link>
       <pubDate>Fri, 23 Jun 2023 18:13:42 +0200</pubDate>
       
-      <guid>https://blog.recurse.se/tags/asp.net/</guid>
+      <guid>https://recurse.se/tags/asp.net/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Design</title>
-      <link>https://blog.recurse.se/tags/design/</link>
+      <link>https://recurse.se/tags/design/</link>
       <pubDate>Fri, 23 Jun 2023 18:13:42 +0200</pubDate>
       
-      <guid>https://blog.recurse.se/tags/design/</guid>
+      <guid>https://recurse.se/tags/design/</guid>
       <description></description>
     </item>
     
     <item>
       <title>TDD</title>
-      <link>https://blog.recurse.se/tags/tdd/</link>
+      <link>https://recurse.se/tags/tdd/</link>
       <pubDate>Fri, 23 Jun 2023 18:13:42 +0200</pubDate>
       
-      <guid>https://blog.recurse.se/tags/tdd/</guid>
+      <guid>https://recurse.se/tags/tdd/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Testing</title>
-      <link>https://blog.recurse.se/tags/testing/</link>
+      <link>https://recurse.se/tags/testing/</link>
       <pubDate>Fri, 23 Jun 2023 18:13:42 +0200</pubDate>
       
-      <guid>https://blog.recurse.se/tags/testing/</guid>
+      <guid>https://recurse.se/tags/testing/</guid>
       <description></description>
     </item>
     
     <item>
       <title>C#</title>
-      <link>https://blog.recurse.se/tags/csharp/</link>
+      <link>https://recurse.se/tags/csharp/</link>
       <pubDate>Wed, 04 Jan 2023 11:51:36 +0100</pubDate>
       
-      <guid>https://blog.recurse.se/tags/csharp/</guid>
+      <guid>https://recurse.se/tags/csharp/</guid>
       <description></description>
     </item>
     
     <item>
       <title>author</title>
-      <link>https://blog.recurse.se/tags/author/</link>
+      <link>https://recurse.se/tags/author/</link>
       <pubDate>Wed, 04 Jan 2023 10:59:42 +0100</pubDate>
       
-      <guid>https://blog.recurse.se/tags/author/</guid>
+      <guid>https://recurse.se/tags/author/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Scala</title>
-      <link>https://blog.recurse.se/tags/scala/</link>
+      <link>https://recurse.se/tags/scala/</link>
       <pubDate>Wed, 02 Oct 2019 07:29:17 +0000</pubDate>
       
-      <guid>https://blog.recurse.se/tags/scala/</guid>
+      <guid>https://recurse.se/tags/scala/</guid>
       <description></description>
     </item>
     

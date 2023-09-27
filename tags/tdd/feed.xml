@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>TDD on Recurse.se</title>
-    <link>https://blog.recurse.se/tags/tdd/</link>
+    <link>https://recurse.se/tags/tdd/</link>
     <description>Recent content in TDD on Recurse.se</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 23 Jun 2023 18:13:42 +0200</lastBuildDate><atom:link href="https://blog.recurse.se/tags/tdd/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 23 Jun 2023 18:13:42 +0200</lastBuildDate><atom:link href="https://recurse.se/tags/tdd/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Top Down TDD</title>
-      <link>https://blog.recurse.se/2023/06/top-down-tdd/</link>
+      <link>https://recurse.se/2023/06/top-down-tdd/</link>
       <pubDate>Fri, 23 Jun 2023 18:13:42 +0200</pubDate>
       
-      <guid>https://blog.recurse.se/2023/06/top-down-tdd/</guid>
+      <guid>https://recurse.se/2023/06/top-down-tdd/</guid>
       <description>The software culture I operate in is strongly influenced by Extreme Programming (XP) and a big part of this is the importance of test driven development (TDD). We typically don&amp;rsquo;t approve PRs without unit tests, as a concrete example. This post will discuss using TDD to design and implement a feature in a top-down fashion. The examples are in C# and ASP.NET, but I expect them to be understandable for people using different languages and frameworks.</description>
     </item>
     
