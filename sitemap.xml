@@ -2,19 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://recurse.se/tags/expressions/</loc>
+    <lastmod>2023-11-16T17:35:42+01:00</lastmod>
+  </url><url>
+    <loc>https://recurse.se/tags/languages/</loc>
+    <lastmod>2023-11-16T17:35:42+01:00</lastmod>
+  </url><url>
+    <loc>https://recurse.se/posts/</loc>
+    <lastmod>2023-11-16T17:35:42+01:00</lastmod>
+  </url><url>
+    <loc>https://recurse.se/tags/programming/</loc>
+    <lastmod>2023-11-16T17:35:42+01:00</lastmod>
+  </url><url>
+    <loc>https://recurse.se/tags/python/</loc>
+    <lastmod>2023-11-16T17:35:42+01:00</lastmod>
+  </url><url>
+    <loc>https://recurse.se/</loc>
+    <lastmod>2023-11-16T17:35:42+01:00</lastmod>
+  </url><url>
+    <loc>https://recurse.se/tags/scala/</loc>
+    <lastmod>2023-11-16T17:35:42+01:00</lastmod>
+  </url><url>
+    <loc>https://recurse.se/tags/statements/</loc>
+    <lastmod>2023-11-16T17:35:42+01:00</lastmod>
+  </url><url>
+    <loc>https://recurse.se/tags/</loc>
+    <lastmod>2023-11-16T17:35:42+01:00</lastmod>
+  </url><url>
     <loc>https://recurse.se/tags/asp.net/</loc>
     <lastmod>2023-06-23T18:13:42+02:00</lastmod>
   </url><url>
     <loc>https://recurse.se/tags/design/</loc>
-    <lastmod>2023-06-23T18:13:42+02:00</lastmod>
-  </url><url>
-    <loc>https://recurse.se/posts/</loc>
-    <lastmod>2023-06-23T18:13:42+02:00</lastmod>
-  </url><url>
-    <loc>https://recurse.se/</loc>
-    <lastmod>2023-06-23T18:13:42+02:00</lastmod>
-  </url><url>
-    <loc>https://recurse.se/tags/</loc>
     <lastmod>2023-06-23T18:13:42+02:00</lastmod>
   </url><url>
     <loc>https://recurse.se/tags/tdd/</loc>
@@ -37,9 +55,6 @@
   </url><url>
     <loc>https://recurse.se/authors/martin-hellspong/</loc>
     <lastmod>2023-01-04T10:59:42+01:00</lastmod>
-  </url><url>
-    <loc>https://recurse.se/tags/scala/</loc>
-    <lastmod>2019-10-02T07:29:17+00:00</lastmod>
   </url><url>
     <loc>https://recurse.se/2019/10/scala-3-returning-implicit-function-literals/</loc>
     <lastmod>2019-10-02T07:29:17+00:00</lastmod>

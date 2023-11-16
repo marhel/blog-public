@@ -6,28 +6,34 @@
     <description>Recent content in Scala on Recurse.se</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 02 Oct 2019 07:29:17 +0000</lastBuildDate><atom:link href="https://recurse.se/tags/scala/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 16 Nov 2023 17:35:42 +0100</lastBuildDate>
+    <atom:link href="https://recurse.se/tags/scala/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Statements vs Expressions</title>
+      <link>https://recurse.se/2023/11/statements-vs-expressions/</link>
+      <pubDate>Thu, 16 Nov 2023 17:35:42 +0100</pubDate>
+      <guid>https://recurse.se/2023/11/statements-vs-expressions/</guid>
+      <description>Programming languages are sometimes categorized into expression-oriented or statement-oriented. Statements typically do something, whereas expressions produce values.
+These two categories are not clear-cut, and languages can and do support both styles but tend to lean one way or the other. As a rule of thumb we can understand the difference, and categorize the language, by taking a look at how one writes conditionals (a.k.a. if statements) in the language.
+Statement oriented if Link to heading A very common form of the if statement that you know and love enables you to choose which of two actions to perform:</description>
+    </item>
     <item>
       <title>Scala 3: Returning implicit function literals</title>
       <link>https://recurse.se/2019/10/scala-3-returning-implicit-function-literals/</link>
       <pubDate>Wed, 02 Oct 2019 07:29:17 +0000</pubDate>
-      
       <guid>https://recurse.se/2019/10/scala-3-returning-implicit-function-literals/</guid>
       <description>When I recently looked at implicit functions in Scala 3 (still only available as a pre-release compiler codenamed &amp;lsquo;Dotty&amp;rsquo;) I wondered: What if we need to perform an expensive operation before returning an implicit function literal?
 This turned out to be a lot harder to achieve than I anticipated. Lets first look at how this can be done via an ordinary lambda function, though, before going any further.
 (You can try this out in the dotty REPL, dotr)</description>
     </item>
-    
     <item>
       <title>Implicit Functions in Scala 3</title>
       <link>https://recurse.se/2019/09/implicit-functions-in-scala-3/</link>
       <pubDate>Sun, 29 Sep 2019 16:23:21 +0000</pubDate>
-      
       <guid>https://recurse.se/2019/09/implicit-functions-in-scala-3/</guid>
       <description>One of the many new things in Scala 3 (still only available as a pre-release compiler codenamed &amp;lsquo;Dotty&amp;rsquo;) is the ability to define implicit functions - lambda functions with only implicit parameters.
 A few neat things are enabled by using implicit functions as parameters or return values, and I wanted to explore this further.
 TL;DR: implicit parameters in Scala 2 are eager to bind to their implicit values, whereas implicit functions as parameters or return values in Scala 3, allows us to bind implicit values lazily.</description>
     </item>
-    
   </channel>
 </rss>

@@ -6,56 +6,47 @@
     <description>Recent content on Recurse.se</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 23 Jun 2023 18:13:42 +0200</lastBuildDate><atom:link href="https://recurse.se/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 16 Nov 2023 17:35:42 +0100</lastBuildDate>
+    <atom:link href="https://recurse.se/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Top Down TDD</title>
       <link>https://recurse.se/2023/06/top-down-tdd/</link>
       <pubDate>Fri, 23 Jun 2023 18:13:42 +0200</pubDate>
-      
       <guid>https://recurse.se/2023/06/top-down-tdd/</guid>
       <description>The software culture I operate in is strongly influenced by Extreme Programming (XP) and a big part of this is the importance of test driven development (TDD). We typically don&amp;rsquo;t approve PRs without unit tests, as a concrete example. This post will discuss using TDD to design and implement a feature in a top-down fashion. The examples are in C# and ASP.NET, but I expect them to be understandable for people using different languages and frameworks.</description>
     </item>
-    
     <item>
       <title>Martin Hellspong</title>
       <link>https://recurse.se/authors/martin-hellspong/</link>
       <pubDate>Wed, 04 Jan 2023 10:59:42 +0100</pubDate>
-      
       <guid>https://recurse.se/authors/martin-hellspong/</guid>
       <description>Hello, I&amp;rsquo;m Martin, the main author of the recurse.se blog.
 Please read the about page for more info about me.</description>
     </item>
-    
     <item>
       <title>Scala 3: Returning implicit function literals</title>
       <link>https://recurse.se/2019/10/scala-3-returning-implicit-function-literals/</link>
       <pubDate>Wed, 02 Oct 2019 07:29:17 +0000</pubDate>
-      
       <guid>https://recurse.se/2019/10/scala-3-returning-implicit-function-literals/</guid>
       <description>When I recently looked at implicit functions in Scala 3 (still only available as a pre-release compiler codenamed &amp;lsquo;Dotty&amp;rsquo;) I wondered: What if we need to perform an expensive operation before returning an implicit function literal?
 This turned out to be a lot harder to achieve than I anticipated. Lets first look at how this can be done via an ordinary lambda function, though, before going any further.
 (You can try this out in the dotty REPL, dotr)</description>
     </item>
-    
     <item>
       <title>Implicit Functions in Scala 3</title>
       <link>https://recurse.se/2019/09/implicit-functions-in-scala-3/</link>
       <pubDate>Sun, 29 Sep 2019 16:23:21 +0000</pubDate>
-      
       <guid>https://recurse.se/2019/09/implicit-functions-in-scala-3/</guid>
       <description>One of the many new things in Scala 3 (still only available as a pre-release compiler codenamed &amp;lsquo;Dotty&amp;rsquo;) is the ability to define implicit functions - lambda functions with only implicit parameters.
 A few neat things are enabled by using implicit functions as parameters or return values, and I wanted to explore this further.
 TL;DR: implicit parameters in Scala 2 are eager to bind to their implicit values, whereas implicit functions as parameters or return values in Scala 3, allows us to bind implicit values lazily.</description>
     </item>
-    
     <item>
       <title>About</title>
       <link>https://recurse.se/about/</link>
       <pubDate>Wed, 10 Aug 2011 22:52:32 +0000</pubDate>
-      
       <guid>https://recurse.se/about/</guid>
       <description>Hi there Link to heading My name is Martin, and I&amp;rsquo;m a developer from Sweden. I hold a Master&amp;rsquo;s Degree in Software Engineering and have developed software professionally since 1998, mainly as a consultant, but have been programming for fun for more than thirty-five years. Programming and software development is more than a job for me, it&amp;rsquo;s a passion! My Master&amp;rsquo;s thesis described and implemented an object oriented framework for compiler construction.</description>
     </item>
-    
   </channel>
 </rss>

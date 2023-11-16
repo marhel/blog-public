@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>C# on Recurse.se</title>
-    <link>https://recurse.se/tags/csharp/</link>
-    <description>Recent content in C# on Recurse.se</description>
+    <title>Programming on Recurse.se</title>
+    <link>https://recurse.se/tags/programming/</link>
+    <description>Recent content in Programming on Recurse.se</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 04 Jan 2023 11:51:36 +0100</lastBuildDate>
-    <atom:link href="https://recurse.se/tags/csharp/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 16 Nov 2023 17:35:42 +0100</lastBuildDate>
+    <atom:link href="https://recurse.se/tags/programming/feed.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Statements vs Expressions</title>
       <link>https://recurse.se/2023/11/statements-vs-expressions/</link>
@@ -16,13 +16,6 @@
       <description>Programming languages are sometimes categorized into expression-oriented or statement-oriented. Statements typically do something, whereas expressions produce values.
 These two categories are not clear-cut, and languages can and do support both styles but tend to lean one way or the other. As a rule of thumb we can understand the difference, and categorize the language, by taking a look at how one writes conditionals (a.k.a. if statements) in the language.
 Statement oriented if Link to heading A very common form of the if statement that you know and love enables you to choose which of two actions to perform:</description>
-    </item>
-    <item>
-      <title>Top Down TDD</title>
-      <link>https://recurse.se/2023/06/top-down-tdd/</link>
-      <pubDate>Fri, 23 Jun 2023 18:13:42 +0200</pubDate>
-      <guid>https://recurse.se/2023/06/top-down-tdd/</guid>
-      <description>The software culture I operate in is strongly influenced by Extreme Programming (XP) and a big part of this is the importance of test driven development (TDD). We typically don&amp;rsquo;t approve PRs without unit tests, as a concrete example. This post will discuss using TDD to design and implement a feature in a top-down fashion. The examples are in C# and ASP.NET, but I expect them to be understandable for people using different languages and frameworks.</description>
     </item>
   </channel>
 </rss>

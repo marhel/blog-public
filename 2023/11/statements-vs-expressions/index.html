@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>
+  Statements vs Expressions · Recurse.se
+</title>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Martin Hellspong">
+<meta name="description" content="Considerations of the statements vs expressions distinction in programming language design">
+<meta name="keywords" content="blog,developer,personal,software,programming">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Statements vs Expressions"/>
+<meta name="twitter:description" content="Considerations of the statements vs expressions distinction in programming language design"/>
+
+<meta property="og:title" content="Statements vs Expressions" />
+<meta property="og:description" content="Considerations of the statements vs expressions distinction in programming language design" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://recurse.se/2023/11/statements-vs-expressions/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-11-16T17:35:42+01:00" />
+<meta property="article:modified_time" content="2023-11-16T17:35:42+01:00" />
+
+
+
+
+
+<link rel="canonical" href="https://recurse.se/2023/11/statements-vs-expressions/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.36f76aaf39a14ecf5c3a3c6250dcaf06c238b3d8365d17d646f95cb1874e852b.css" integrity="sha256-NvdqrzmhTs9cOjxiUNyvBsI4s9g2XRfWRvlcsYdOhSs=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+<meta name="generator" content="Hugo 0.120.4">
+
+
+
+
+
+  </head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Recurse.se
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Posts</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/tags/">Tags</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="https://github.com/marhel"></a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://recurse.se/2023/11/statements-vs-expressions/">
+              Statements vs Expressions
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2023-11-16T17:35:42&#43;01:00">
+                November 16, 2023
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              10-minute read
+            </span>
+          </div>
+          
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/languages/">Languages</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/programming/">Programming</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/expressions/">Expressions</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/statements/">Statements</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/scala/">Scala</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/python/">Python</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/csharp/">C#</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+          <img src="/images/expr-2w.jpeg" alt="Featured image"/>
+        
+        <p>Programming languages are sometimes categorized into expression-oriented or statement-oriented. Statements typically <em>do</em> something, whereas expressions <em>produce values</em>.</p>
+<p>These two categories are not clear-cut, and languages can and do support both styles but tend to lean one way or the other. As a rule of thumb we can understand the difference, and categorize the language, by taking a look at how one writes conditionals (a.k.a. <em>if statements</em>) in the language.</p>
+<h2 id="statement-oriented-if">
+  Statement oriented <em>if</em>
+  <a class="heading-link" href="#statement-oriented-if">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>A very common form of the <em>if statement</em> that you know and love enables you to choose which of two actions to perform:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#aaa;font-style:italic"># This is Python code</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a">if</span> shouldGenerate:
+</span></span><span style="display:flex;"><span>  <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;yes&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#00a">else</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;no&#34;</span>)
+</span></span></code></pre></div><p>This is of course very useful, but If we think about it, in this particular snippet we repeat the call to print, which in a way is a violation of the <a href="https://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY principle</a>. So in some cases, especially if this call was more complicated than a single parameter, you&rsquo;d prefer to instead calculate the parameters once, and then call print once:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#00a">if</span> shouldGenerate:
+</span></span><span style="display:flex;"><span>  importantStuff = generateStuff(<span style="color:#099">42</span>)
+</span></span><span style="display:flex;"><span><span style="color:#00a">else</span>:
+</span></span><span style="display:flex;"><span>  importantStuff = loadStuffFromFile(<span style="color:#a50">&#34;some.stuff&#34;</span>)
+</span></span><span style="display:flex;"><span>printStuff(importantStuff, otherParams, Formatting.INDENTED)
+</span></span></code></pre></div><p>But now, we instead introduced a different kind of duplication (triplication here even, and quadruplication if you&rsquo;d need to declare the variable first like in TypeScript) when we need to give the intermediate value a name - and as the joke goes, <em>&ldquo;the two hardest problems in programming are naming things, cache invalidation and off-by-one errors.&rdquo;</em></p>
+<h2 id="expression-oriented-if">
+  Expression oriented <em>if</em>
+  <a class="heading-link" href="#expression-oriented-if">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>If we could treat the <code>if</code> as an expression instead, then we could drop one repetition of the name.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>importantStuff = <span style="color:#00a">if</span> shouldGenerate:
+</span></span><span style="display:flex;"><span>  generateStuff(<span style="color:#099">42</span>)
+</span></span><span style="display:flex;"><span><span style="color:#00a">else</span>:
+</span></span><span style="display:flex;"><span>  loadStuffFromFile(<span style="color:#a50">&#34;some.stuff&#34;</span>)
+</span></span><span style="display:flex;"><span>printStuff(importantStuff, otherParams, Formatting.INDENTED)
+</span></span></code></pre></div><p>Note that the above is in fact not valid Python. However there&rsquo;s an expression variant of <code>if</code> that looks slightly different;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#0aa">print</span>(<span style="color:#a50">&#34;yes&#34;</span> <span style="color:#00a">if</span> shouldGenerate <span style="color:#00a">else</span> <span style="color:#a50">&#34;no&#34;</span>)
+</span></span></code></pre></div><p>which enables us to write valid Python where we can assign the value of the if-expression to a variable for later use;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>importantStuff = generateStuff(<span style="color:#099">42</span>) <span style="color:#00a">if</span> shouldGenerate \
+</span></span><span style="display:flex;"><span><span style="color:#00a">else</span> loadStuffFromFile(<span style="color:#a50">&#34;some.stuff&#34;</span>)
+</span></span><span style="display:flex;"><span>printStuff(importantStuff, otherParams, Formatting.INDENTED)
+</span></span></code></pre></div><blockquote>
+<p>Note as an aside that Python&rsquo;s syntax does not allow us to spread the if expression variant over multiple lines without using the backslash which hints that they didn&rsquo;t want to encourage writing overly complicated expressions.</p>
+</blockquote>
+<p>If we switch to Scala 3 - an expression oriented language - we don&rsquo;t even have both a statement form and expression form of if, just the expression form.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// This is Scala 3 code
+</span></span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic"></span><span style="color:#00a">val</span> importantStuff <span style="color:#00a">=</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#00a">if</span> shouldGenerate then
+</span></span><span style="display:flex;"><span>    generateStuff(<span style="color:#099">42</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#00a">else</span>
+</span></span><span style="display:flex;"><span>    loadStuffFromFile(<span style="color:#a50">&#34;some.stuff&#34;</span>)
+</span></span><span style="display:flex;"><span>printStuff(importantStuff, otherParams, <span style="color:#0a0;text-decoration:underline">Formatting</span>.<span style="color:#0a0;text-decoration:underline">Indented</span>)
+</span></span></code></pre></div><p>We can even avoid naming the conditional expression entirely by inlining it directly at parameter position;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span>printStuff(
+</span></span><span style="display:flex;"><span>  <span style="color:#00a">if</span> shouldGenerate then generateStuff(<span style="color:#099">42</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#00a">else</span> loadStuffFromFile(<span style="color:#a50">&#34;some.stuff&#34;</span>),
+</span></span><span style="display:flex;"><span>  otherParams,
+</span></span><span style="display:flex;"><span>  <span style="color:#0a0;text-decoration:underline">Formatting</span>.<span style="color:#0a0;text-decoration:underline">Indented</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>In fact, you commonly encounter much more complex nested expressions in Scala, which is kind of a readability problem.</p>
+<blockquote>
+<p>It turns out that naming intermediate values can in fact make things easier to understand! It is easy to go overboard with expressions in languages like Scala.</p>
+</blockquote>
+<h2 id="the-value-of-nothing">
+  The value of nothing
+  <a class="heading-link" href="#the-value-of-nothing">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>But how, you might ask, do languages (like Scala) with only expression oriented conditionals cope with the lack of the statement form, and the need to choose which of two actions to perform?</p>
+<p>There&rsquo;s two parts to the answer. The first is that you are typically not <em>forced</em> to use the result of an expression in expression-oriented languages, so it is perfectly valid in Scala to just call <code>println</code> (which doesn&rsquo;t return anything useful anyway) in each arm of the conditional;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">if</span> shouldGenerate then
+</span></span><span style="display:flex;"><span>  println(<span style="color:#a50">&#34;yes&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#00a">else</span>
+</span></span><span style="display:flex;"><span>  println(<span style="color:#a50">&#34;no&#34;</span>)
+</span></span></code></pre></div><p>The second part of the answer is <strong>uniformity</strong>! To understand why, let&rsquo;s look deeper. As we shall see, we can make some useful generalizations of our code if we are not forced to treat functions differently depending on if they do or do not return something.</p>
+<h2 id="uniformity">
+  Uniformity
+  <a class="heading-link" href="#uniformity">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>This is why in Scala and many other functional languages, there is commonly (and somewhat paradoxically) a special value (and a corresponding data type) representing &rsquo;no useful value&rsquo; which is used (sometimes implicitly) as the return value when there&rsquo;s nothing else useful to return.</p>
+<p>So in effect, there&rsquo;s no such thing in Scala as a function that does not return a value, whereas in many languages (C, C++, Java, C# and Pascal comes to mind), functions that do return values are different from functions that don&rsquo;t - explicitly declared as <code>function</code> or <code>procedure</code> in Pascal, or declaring a <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/void"><code>void</code></a> return value in C, C++, Java or C#.</p>
+<p>In Scala, this &rsquo;no useful value&rsquo; is of a type called Unit, which only has a single possible value, written as <code>()</code>, which is used when there&rsquo;s no other useful value to return.</p>
+<blockquote>
+<p>I&rsquo;ve used Scala for years, and used <code>Unit</code> all the time, but can&rsquo;t remember needing to explicitly write out the <code>()</code> more than a handful of times.</p>
+</blockquote>
+<p>In Python, the corresponding value is <code>None</code> which is implicitly returned from any function if you don&rsquo;t do an explicit <code>return</code>, which is also the case in Scala.</p>
+<h3 id="but-thats-no-different-from-using-void-is-it">
+  But that&rsquo;s no different from using <code>void</code>, is it?
+  <a class="heading-link" href="#but-thats-no-different-from-using-void-is-it">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>It is in fact very different. Let&rsquo;s look at an example:</p>
+<p>Assume we have a function <code>PerformHugeCalc</code> that  performs some calculation, producing a very large result needing a lot of memory, and instead of returning the result to you (let&rsquo;s say, because it would need to be sent to you over a network),
+we want to write a generic function <code>CondenseHugeCalc</code> which you are supposed to give a &ldquo;condenser&rdquo; function, that &ldquo;condenses&rdquo; the value in some useful manner to something smaller, and then <code>CondenseHugeCalc</code> should return this much smaller representation as it&rsquo;s result. Possibly our function could write the huge result to a file, and then just return the file name.</p>
+<p>In C# we&rsquo;d write something like this, assuming for now that the <code>condenser</code> returns a string (i.e. the type of the condensed value is <code>string</code>);</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// This is C# code</span>
+</span></span><span style="display:flex;"><span><span style="color:#0aa">string</span> CondenseHugeCalc(
+</span></span><span style="display:flex;"><span>  Func&lt;HugeResult, <span style="color:#0aa">string</span>&gt; condenser,
+</span></span><span style="display:flex;"><span>  HugeParams hparams) 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#0aa">var</span> huge = PerformHugeCalc(hparams);
+</span></span><span style="display:flex;"><span>  <span style="color:#00a">return</span> condenser(huge);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// usage, assuming we have a method</span>
+</span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// string WriteToFile(HugeResult result);</span>
+</span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// and a chat object that can send data somewhere</span>
+</span></span><span style="display:flex;"><span>chat.Send(CondenseHugeCalc(WriteToFile, hparams));
+</span></span></code></pre></div><p>This is all fine and dandy, so far. What if we want to make CondenseHugeCalc generic over the return type of our condenser?</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span>TRes CondenseHugeCalc&lt;TRes&gt;(
+</span></span><span style="display:flex;"><span>  Func&lt;HugeResult, TRes&gt; condenser,
+</span></span><span style="display:flex;"><span>  HugeParams hparams) 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#0aa">var</span> huge = PerformHugeCalc(hparams);
+</span></span><span style="display:flex;"><span>  <span style="color:#00a">return</span> condenser(huge);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// usage, assuming we have a method</span>
+</span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// int ReportLength(HugeResult result);</span>
+</span></span><span style="display:flex;"><span>chat.Send(CondenseHugeCalc(ReportLength, hparams));
+</span></span></code></pre></div><p><em>&ldquo;I can do this!&rdquo;</em> - C# just giggles at how easy this is. That is, until it spits out it&rsquo;s milk when we try to pass in a <code>void</code> function (say, <code>void PlaySound(HugeResult result);</code> that plays the HugeResult as a sound without also returning a value).</p>
+<h3 id="the-curse-of-the-void">
+  The curse of the void
+  <a class="heading-link" href="#the-curse-of-the-void">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Passing in a void function results in <code>Error: the type arguments for 'CondenseHugeCalc' cannot be inferred from the usage. Try specifying the type arguments explicitly.</code> Following the advice leads to two more errors;</p>
+<ul>
+<li><code>Error: Keyword 'void' cannot be used in this context</code></li>
+<li><code>Error: The type 'void' may not be used as a type argument</code>.</li>
+</ul>
+<p>This is because in C# and many other languages the void type is <em>special</em>, variables (or type arguments) cannot have the type <code>void</code>, it is only allowed to distinguish functions without a return value, and you are not allowed to construct a <code>Func&lt;HugeResult, void&gt;</code>. Therefore C# is forced to add a different type, <code>Action</code>, to represent types of void functions, and use <code>Action&lt;HugeResult&gt;</code> as a unfortunate substitute for the invalid <code>Func&lt;HugeResult, void&gt;</code>. We cannot modify CondenseHugeCalc to take an <code>Action&lt;HugeResult&gt;</code> however, as then we wouldn&rsquo;t be able to pass WriteToFile or ReportLength anymore.</p>
+<blockquote>
+<p>Yes, we <em>could</em> add an CondenseHugeCalc overload that takes Action and returns the empty string, or write a trivial wrapper function for PlaySound, which calls PlaySound, and returns the empty string. But what fun is that when there&rsquo;s a perfectly fine <em>&ldquo;my type system is better than yours&rdquo;</em> argument going on? There&rsquo;s all sorts of <em>possible</em> workarounds to problems, but we&rsquo;re discussing the issue itself.</p>
+</blockquote>
+<p>It is at this point I envision Scala saying, &ldquo;Hold my Cognac&rdquo; and proceed to present this;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#00a">def</span> condenseHugeCalc[<span style="color:#0aa">TRes</span>](condenser<span style="color:#00a">:</span> <span style="color:#0aa">HugeResult</span> =&gt; <span style="color:#0a0;text-decoration:underline">TRes</span>, hparams<span style="color:#00a">:</span> <span style="color:#0aa">HugeParams</span>)<span style="color:#00a">:</span> <span style="color:#0aa">TRes</span> = {
+</span></span><span style="display:flex;"><span>  <span style="color:#00a">val</span> huge <span style="color:#00a">=</span> performHugeCalc(hparams);
+</span></span><span style="display:flex;"><span>  <span style="color:#00a">return</span> condenser(huge)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// usage in Scala; assuming we have a method
+</span></span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// playSound(result: HugeResult): Unit
+</span></span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic"></span>chat.send(condenseHugeCalc(playSound, hparams));
+</span></span></code></pre></div><p>This works regardless of condenser return type, Unit or otherwise. Uniformity!</p>
+<blockquote>
+<p>What would be sent over chat in this case, depends on the implementation of send.</p>
+</blockquote>
+<p>So, in conclusion, <code>Unit</code> is emphatically not the same as <code>void</code> as the former allows for <em>uniformity</em> and the latter unnecessarily forces a <em>division</em> onto the type system, as evidenced by the Func/Action divide in C#.</p>
+<h2 id="discarding-the-value-of-an-expression">
+  Discarding the value of an expression
+  <a class="heading-link" href="#discarding-the-value-of-an-expression">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Ignoring the result of an expression (any expression, not just in conditionals) is fine in Scala and many other languages even if your function returns something important, maybe info about a monetary transaction that must not be lost.</p>
+<p>It is then generally assumed that you wanted to execute the function for its side-effects (i.e. say it stored the transaction info to a file first, and sometimes you don&rsquo;t <em>care</em> about the returned value, only that the transaction is now stored). Ignoring the result of a pure function (having no side-effects) is just wasteful.</p>
+<h1 id="pros-and-cons">
+  Pros and cons
+  <a class="heading-link" href="#pros-and-cons">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<h2 id="discarding-results">
+  Discarding results
+  <a class="heading-link" href="#discarding-results">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Some languages acknowledge that discarding the result is possibly a mistake, and in Rust, you can annotate a function with the <a href="https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute">#﻿[must_use] annotation</a> to disallow throwing away the result of the function. In C++17 there&rsquo;s a corresponding <a href="https://en.cppreference.com/w/cpp/language/attributes/nodiscard">[[nodiscard]] attribute</a>.</p>
+<p>For Scala, I&rsquo;m not aware of any annotation, but you can compile your code with <code>-Wvalue-discard</code> and <code>-Werror</code> in which case discarding any &lsquo;important&rsquo; (non-Unit) result would be flagged as an error.</p>
+<p>Some linting tools for various languages allows to flag this potential mistake as well.</p>
+<h2 id="readability-vs-composability">
+  Readability vs composability
+  <a class="heading-link" href="#readability-vs-composability">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>Another common criticism of expression orientation is that statements have the advantage of having a clear beginning and end, whereas expressions can be endlessly combined, which can hurt readability.</p>
+<p>However, the composability is also seen as a strength of expression oriented languages.</p>
+<h2 id="mixing-up-assignment-and-equality">
+  Mixing up assignment and equality
+  <a class="heading-link" href="#mixing-up-assignment-and-equality">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>When assigment is also a valid expression, accidentally mixing up assignment and equality checks is a source of bugs, because you might do:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#00a">if</span> currentAnswer := correctAnswer:
+</span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Very good?!&#34;</span>)
+</span></span></code></pre></div><p>which mistakenly <em>modifies</em> currentAnswer, and you probably meant to check for equality;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#00a">if</span> currentAnswer == correctAnswer:
+</span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Very good!&#34;</span>)
+</span></span></code></pre></div><p>This is one reason some languages don&rsquo;t have assignment expressions (only assigment statements) or disallows use of an assignment expression where a boolean expression is expected, even if it sometimes convenient to do:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#00a">if</span> <span style="color:#00a">match</span> := re.search(pattern, text):
+</span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Found:&#34;</span>, <span style="color:#00a">match</span>.group(<span style="color:#099">0</span>))
+</span></span><span style="display:flex;"><span><span style="color:#00a">elif</span> <span style="color:#00a">match</span> := re.search(otherpattern, text):
+</span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Alternate found:&#34;</span>, <span style="color:#00a">match</span>.group(<span style="color:#099">0</span>))
+</span></span></code></pre></div><p>instead of</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#00a">match</span> = re.search(pattern, text)
+</span></span><span style="display:flex;"><span><span style="color:#00a">if</span> <span style="color:#00a">match</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Found:&#34;</span>, <span style="color:#00a">match</span>.group(<span style="color:#099">0</span>))
+</span></span><span style="display:flex;"><span><span style="color:#00a">else</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">match</span> = re.search(otherpattern, text):
+</span></span><span style="display:flex;"><span>    <span style="color:#00a">if</span> <span style="color:#00a">match</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Alternate found:&#34;</span>, <span style="color:#00a">match</span>.group(<span style="color:#099">0</span>))
+</span></span></code></pre></div><h2 id="paradigm-comparison">
+  Paradigm comparison
+  <a class="heading-link" href="#paradigm-comparison">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>In general <a href="https://en.wikipedia.org/wiki/Functional_programming_language">functional programming languages</a> are expression-oriented, whereas imperative and object-oriented languages tend to be statement-oriented, but of course some languages are multiparadigm which muddies the water.</p>
+<p>Lesser known paradigms are harder to classify, but
+<a href="https://concatenative.org/">Concatenative languages</a> are definitely expression oriented as they mostly do not have &lsquo;statements&rsquo; - all <em>words</em> are expressions that operate on implicit parameters and compose well with other <em>words</em> to form more complex expressions. Concatenative languages are often stack-based where parameters are popped off the stack and results are pushed onto the stack. <a href="https://en.wikipedia.org/wiki/Forth_(programming_language)">Forth</a> was probably the first such language, but there are more modern variants like <a href="https://factorcode.org/">Factor</a>. The <a href="https://en.wikipedia.org/wiki/Array_programming">array-oriented languages</a> such as <a href="https://aplwiki.com/">APL</a>, <a href="https://www.jsoftware.com/">J</a> or <a href="https://www.uiua.org/">Uiua</a> are also using a concatenative, expression-oriented style with implicit parameters.</p>
+<p>You might think of SQL as statement oriented, since the terminology is that everything is &lsquo;statements&rsquo;, but from our point of view, the core statements of SQL are actually expressions, as you can combine say a SELECT statement with a DELETE statement, and the combination is also an expression as you can output the deleted rows to combine even further;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-SQL" data-lang="SQL"><span style="display:flex;"><span><span style="color:#00a">DELETE</span><span style="color:#bbb"> </span><span style="color:#00a">FROM</span><span style="color:#bbb"> </span>orders<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#00a">WHERE</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#00a">IN</span><span style="color:#bbb"> </span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#00a">SELECT</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#00a">FROM</span><span style="color:#bbb"> </span>orders<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#00a">WHERE</span><span style="color:#bbb"> </span>amount<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span><span style="color:#099">0</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>RETURNING<span style="color:#bbb"> </span>id<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Assembly langauges are at the other extreme, being purely statement oriented as there are no way to build compound expressions, short of using macro-assemblers.</p>
+<h2 id="my-preference">
+  My preference
+  <a class="heading-link" href="#my-preference">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h2>
+<p>I prefer expression-oriented functional languages over statement based imperative languages, as the former are more <em>expressive</em>, which in this context sounds like a joke, but is due to expressions having fundamentally better <em>composability</em> than statements. The result of a calculation can be fed as input into another without being overly verbose about the intermediate steps.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+      2011 -
+    
+    2023
+     Martin Hellspong 
+    ·
+    
+    Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>
