@@ -138,7 +138,7 @@
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              10-minute read
+              11-minute read
             </span>
           </div>
           
@@ -307,7 +307,7 @@ we want to write a generic function <code>CondenseHugeCalc</code> which you are 
 </span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// usage, assuming we have a method</span>
 </span></span><span style="display:flex;"><span><span style="color:#aaa;font-style:italic">// int ReportLength(HugeResult result);</span>
 </span></span><span style="display:flex;"><span>chat.Send(CondenseHugeCalc(ReportLength, hparams));
-</span></span></code></pre></div><p><em>&ldquo;I can do this!&rdquo;</em> - C# just giggles at how easy this is. That is, until it spits out it&rsquo;s milk when we try to pass in a <code>void</code> function (say, <code>void PlaySound(HugeResult result);</code> that plays the HugeResult as a sound without also returning a value).</p>
+</span></span></code></pre></div><p><em>&ldquo;I can do this!&rdquo;</em> - C# just giggles at how easy this is. That is, until it spits out its milk when we try to pass in a <code>void</code> function (say, <code>void PlaySound(HugeResult result);</code> that plays the HugeResult as a sound without also returning a value).</p>
 <h3 id="the-curse-of-the-void">
   The curse of the void
   <a class="heading-link" href="#the-curse-of-the-void">
@@ -371,8 +371,8 @@ we want to write a generic function <code>CondenseHugeCalc</code> which you are 
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>Another common criticism of expression orientation is that statements have the advantage of having a clear beginning and end, whereas expressions can be endlessly combined, which can hurt readability.</p>
-<p>However, the composability is also seen as a strength of expression oriented languages.</p>
+<p>Another common criticism of expression orientation is that it can hurt readability; statements have the advantage of having a clear beginning and end, whereas expressions can be endlessly combined.</p>
+<p>However, the composability of expressions is also seen as a strength of expression oriented languages.</p>
 <h2 id="mixing-up-assignment-and-equality">
   Mixing up assignment and equality
   <a class="heading-link" href="#mixing-up-assignment-and-equality">
@@ -380,18 +380,19 @@ we want to write a generic function <code>CondenseHugeCalc</code> which you are 
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>When assigment is also a valid expression, accidentally mixing up assignment and equality checks is a source of bugs, because you might do:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#00a">if</span> currentAnswer := correctAnswer:
-</span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Very good?!&#34;</span>)
-</span></span></code></pre></div><p>which mistakenly <em>modifies</em> currentAnswer, and you probably meant to check for equality;</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#00a">if</span> currentAnswer == correctAnswer:
-</span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Very good!&#34;</span>)
-</span></span></code></pre></div><p>This is one reason some languages don&rsquo;t have assignment expressions (only assigment statements) or disallows use of an assignment expression where a boolean expression is expected, even if it sometimes convenient to do:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#00a">if</span> <span style="color:#00a">match</span> := re.search(pattern, text):
+<p>When assignment is also a valid expression, accidentally mixing up assignment and equality checks is a source of bugs, because you might do (example in C):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#00a">if</span>(currentAnswer = correctAnswer)
+</span></span><span style="display:flex;"><span>    <span style="color:#0a0">printf</span>(<span style="color:#a50">&#34;Very good?!&#34;</span>);
+</span></span></code></pre></div><p>which is valid C; but mistakenly <em>modifies</em> currentAnswer, and you probably meant to check for equality;</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#00a">if</span>(currentAnswer == correctAnswer)
+</span></span><span style="display:flex;"><span>    <span style="color:#0a0">printf</span>(<span style="color:#a50">&#34;Very good!&#34;</span>);
+</span></span></code></pre></div><p>This potential confusion is one reason some languages don&rsquo;t have assignment expressions (only assignment statements) or disallows use of an assignment expression where a boolean expression is expected, even if it sometimes convenient to do:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#aaa;font-style:italic"># This is valid since Python 3.8</span>
+</span></span><span style="display:flex;"><span><span style="color:#00a">if</span> <span style="color:#00a">match</span> := re.search(pattern, text):
 </span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Found:&#34;</span>, <span style="color:#00a">match</span>.group(<span style="color:#099">0</span>))
 </span></span><span style="display:flex;"><span><span style="color:#00a">elif</span> <span style="color:#00a">match</span> := re.search(otherpattern, text):
 </span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Alternate found:&#34;</span>, <span style="color:#00a">match</span>.group(<span style="color:#099">0</span>))
-</span></span></code></pre></div><p>instead of</p>
+</span></span></code></pre></div><p>which is valid Python since 2019, when the <a href="https://docs.python.org/3/whatsnew/3.8.html">assignment expression (:=)</a> was introduced, to simplify cases like:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#00a">match</span> = re.search(pattern, text)
 </span></span><span style="display:flex;"><span><span style="color:#00a">if</span> <span style="color:#00a">match</span>:
 </span></span><span style="display:flex;"><span>    <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Found:&#34;</span>, <span style="color:#00a">match</span>.group(<span style="color:#099">0</span>))
@@ -399,14 +400,18 @@ we want to write a generic function <code>CondenseHugeCalc</code> which you are 
 </span></span><span style="display:flex;"><span>    <span style="color:#00a">match</span> = re.search(otherpattern, text):
 </span></span><span style="display:flex;"><span>    <span style="color:#00a">if</span> <span style="color:#00a">match</span>:
 </span></span><span style="display:flex;"><span>        <span style="color:#0aa">print</span>(<span style="color:#a50">&#34;Alternate found:&#34;</span>, <span style="color:#00a">match</span>.group(<span style="color:#099">0</span>))
-</span></span></code></pre></div><h2 id="paradigm-comparison">
+</span></span></code></pre></div><p>This section from the <a href="https://peps.python.org/pep-0572/#why-not-just-turn-existing-assignment-into-an-expression">proposal to add assignment expressions</a> to Python is informative;</p>
+<blockquote>
+<p><strong>Why not just turn existing assignment into an expression?</strong> C and its derivatives define the = operator as an expression, rather than a statement as is Python’s way. This allows assignments in more contexts, including contexts where comparisons are more common. The syntactic similarity between <code>if (x == y)</code> and <code>if (x = y)</code> belies their drastically different semantics. Thus this proposal uses <code>:=</code> to clarify the distinction.</p>
+</blockquote>
+<h2 id="paradigm-comparison">
   Paradigm comparison
   <a class="heading-link" href="#paradigm-comparison">
     <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
     <span class="sr-only">Link to heading</span>
   </a>
 </h2>
-<p>In general <a href="https://en.wikipedia.org/wiki/Functional_programming_language">functional programming languages</a> are expression-oriented, whereas imperative and object-oriented languages tend to be statement-oriented, but of course some languages are multiparadigm which muddies the water.</p>
+<p>In general, <a href="https://en.wikipedia.org/wiki/Functional_programming_language">functional programming languages</a> are expression-oriented, whereas imperative and object-oriented languages tend to be statement-oriented, but of course some languages are multiparadigm which muddies the water.</p>
 <p>Lesser known paradigms are harder to classify, but
 <a href="https://concatenative.org/">Concatenative languages</a> are definitely expression oriented as they mostly do not have &lsquo;statements&rsquo; - all <em>words</em> are expressions that operate on implicit parameters and compose well with other <em>words</em> to form more complex expressions. Concatenative languages are often stack-based where parameters are popped off the stack and results are pushed onto the stack. <a href="https://en.wikipedia.org/wiki/Forth_(programming_language)">Forth</a> was probably the first such language, but there are more modern variants like <a href="https://factorcode.org/">Factor</a>. The <a href="https://en.wikipedia.org/wiki/Array_programming">array-oriented languages</a> such as <a href="https://aplwiki.com/">APL</a>, <a href="https://www.jsoftware.com/">J</a> or <a href="https://www.uiua.org/">Uiua</a> are also using a concatenative, expression-oriented style with implicit parameters.</p>
 <p>You might think of SQL as statement oriented, since the terminology is that everything is &lsquo;statements&rsquo;, but from our point of view, the core statements of SQL are actually expressions, as you can combine say a SELECT statement with a DELETE statement, and the combination is also an expression as you can output the deleted rows to combine even further;</p>
@@ -415,7 +420,7 @@ we want to write a generic function <code>CondenseHugeCalc</code> which you are 
 </span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#00a">SELECT</span><span style="color:#bbb"> </span>id<span style="color:#bbb"> </span><span style="color:#00a">FROM</span><span style="color:#bbb"> </span>orders<span style="color:#bbb">
 </span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#00a">WHERE</span><span style="color:#bbb"> </span>amount<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span><span style="color:#099">0</span>)<span style="color:#bbb">
 </span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>RETURNING<span style="color:#bbb"> </span>id<span style="color:#bbb">
-</span></span></span></code></pre></div><p>Assembly langauges are at the other extreme, being purely statement oriented as there are no way to build compound expressions, short of using macro-assemblers.</p>
+</span></span></span></code></pre></div><p>Assembly languages are at the other extreme, being purely statement oriented as there are no way to build compound expressions, short of using macro-assemblers.</p>
 <h2 id="my-preference">
   My preference
   <a class="heading-link" href="#my-preference">
